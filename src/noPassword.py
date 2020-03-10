@@ -2,26 +2,28 @@ import sys
 from PySide2 import QtWidgets
 
 from MailboxesWidget import MailboxesWidget
-# import connectWidget as connect
-# import registerWidget as register
-# import loginWidget as login
+from ConnectWidget import ConnectWidget
+from RegisterWidget import RegisterWidget
+from LoginWidget import LoginWidget
 
 class NoPasswordWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         self.mailboxes = MailboxesWidget()
-        # self.connect = connect.Connect()
-        # self.register = register.Register()
-        # self.login = login.Login()
+        self.connect = ConnectWidget()
+        self.register = RegisterWidget()
+        self.login = LoginWidget()
 
         self.layout = QtWidgets.QVBoxLayout()
 
         self.layout.addWidget(self.mailboxes)
-        # self.layout.addWidget(self.connect)
-        # self.layout.addWidget(self.register)
-        # self.layout.addWidget(self.login)
+        self.layout.addWidget(self.connect)
+        self.layout.addWidget(self.register)
+        self.layout.addWidget(self.login)
         
+        self.layout.insertStretch(-1)
+
         self.setLayout(self.layout)
 
 

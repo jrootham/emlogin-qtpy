@@ -1,45 +1,50 @@
 from PySide2 import QtCore, QtWidgets
 
-class MailboxesWidget(QtWidgets.QWidget):
+class RegisterWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
 
-        self.title = QtWidgets.QLabel("Mailboxes")
+        self.title = QtWidgets.QLabel("Register")
         self.title.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.__pick__()
+        self.__message__()
         self.__values__()
         self.__buttons__()
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.title)
-        self.layout.addLayout(self.pickBox)
+        self.layout.addLayout(self.messageBox)
         self.layout.addLayout(self.outerValuesBox)
         self.layout.addLayout(self.buttonBox)
-
+        
         self.setLayout(self.layout)
 
-    def __pick__(self):
+    def __message__(self):
+        self.tagLabel = QtWidgets.QLabel("Email tag")
 
-        self.pick = QtWidgets.QComboBox()
-        self.load = QtWidgets.QPushButton("Load")
+        self.tag = QtWidgets.QLineEdit()
 
-        self.pickBox = QtWidgets.QHBoxLayout()
-        self.pickBox.addWidget(self.pick)
-        self.pickBox.addWidget(self.load)
-        self.pickBox.insertStretch(0)
-        self.pickBox.insertStretch(-1)
+        self.messageButton = QtWidgets.QPushButton("Read email")
+
+        self.messageBox = QtWidgets.QHBoxLayout()
+        self.messageBox.addWidget(self.tagLabel)
+        self.messageBox.addWidget(self.tag)
+        self.messageBox.addWidget(self.messageButton)
+        self.messageBox.insertStretch(0)
+        self.messageBox.insertStretch(-1)
+
+
 
     def __values__(self):
-        self.nameLabel = QtWidgets.QLabel("Mailbox name")
+        self.nameLabel = QtWidgets.QLabel("Website name")
         self.name = QtWidgets.QLineEdit()
 
-        self.hostLabel = QtWidgets.QLabel("Host")
-        self.host = QtWidgets.QLineEdit()
+        self.hostLabel = QtWidgets.QLabel("Endpoint")
+        self.host = QtWidgets.QLabel("")
 
-        self.userNameLabel = QtWidgets.QLabel("User name")
-        self.userName = QtWidgets.QLineEdit()
+        self.userNameLabel = QtWidgets.QLabel("Website user name")
+        self.userName = QtWidgets.QLabel("")
 
         self.valuesBox = QtWidgets.QGridLayout()
         self.valuesBox.addWidget(self.nameLabel, 0, 0)
@@ -56,7 +61,7 @@ class MailboxesWidget(QtWidgets.QWidget):
 
     def __buttons__(self):
 
-        self.new = QtWidgets.QPushButton("New")
+        self.new = QtWidgets.QPushButton("Cancel")
         self.save = QtWidgets.QPushButton("Save")
 
         self.buttonBox = QtWidgets.QHBoxLayout()
@@ -64,5 +69,3 @@ class MailboxesWidget(QtWidgets.QWidget):
         self.buttonBox.addWidget(self.save)
         self.buttonBox.insertStretch(0)
         self.buttonBox.insertStretch(-1)
-
-#        self.button.clicked.connect(self.magic)
