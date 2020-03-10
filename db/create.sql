@@ -4,14 +4,14 @@
 
 CREATE TABLE mailboxes
 (
-	name TEXT PRIMARY KEY,
+	name TEXT UNIQUE,
 	host TEXT,
 	user_name TEXT
 );
 
 CREATE TABLE sites
 (
-	name TEXT PRIMARY KEY,
+	name TEXT UNIQUE,
 	endpoint TEXT,
 	identifier TEXT
 );
