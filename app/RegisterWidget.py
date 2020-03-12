@@ -8,31 +8,29 @@ class RegisterWidget(QtWidgets.QWidget):
         self.title = QtWidgets.QLabel("Register")
         self.title.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.__message__()
+        self.__load__()
         self.__values__()
         self.__buttons__()
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.title)
-        self.layout.addLayout(self.messageBox)
+        self.layout.addLayout(self.loadBox)
         self.layout.addLayout(self.outerValuesBox)
         self.layout.addLayout(self.buttonBox)
         
         self.setLayout(self.layout)
 
-    def __message__(self):
-        self.tagLabel = QtWidgets.QLabel("Email tag")
+    def __load__(self):
+        self.dataLabel = QtWidgets.QLabel("Data block")
+        self.data = QtWidgets.QTextEdit()
+        self.loadButton = QtWidgets.QPushButton("Load block")
 
-        self.tag = QtWidgets.QLineEdit()
-
-        self.messageButton = QtWidgets.QPushButton("Read email")
-
-        self.messageBox = QtWidgets.QHBoxLayout()
-        self.messageBox.addWidget(self.tagLabel)
-        self.messageBox.addWidget(self.tag)
-        self.messageBox.addWidget(self.messageButton)
-        self.messageBox.insertStretch(0)
-        self.messageBox.insertStretch(-1)
+        self.loadBox = QtWidgets.QHBoxLayout()
+        self.loadBox.addWidget(self.dataLabel)
+        self.loadBox.addWidget(self.data)
+        self.loadBox.addWidget(self.loadButton)
+        self.loadBox.insertStretch(0)
+        self.loadBox.insertStretch(-1)
 
 
 

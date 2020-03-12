@@ -1,5 +1,7 @@
 import sys
+import sqlite3
 from PySide2 import QtWidgets
+
 
 from MailboxesWidget import MailboxesWidget
 from ConnectWidget import ConnectWidget
@@ -28,6 +30,8 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
+    conn = sqlite3.connect('example.db')
+
     app = QtWidgets.QApplication([])
 
     widget = NoPasswordWidget()
