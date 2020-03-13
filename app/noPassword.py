@@ -1,12 +1,21 @@
+#
+#       noPassword.py
+#
+#       noPassword mainline
+#
+
 import sys
 import sqlite3
 from PySide2 import QtWidgets
 
-
+from Model import Model
 from MailboxesWidget import MailboxesWidget
 from ConnectWidget import ConnectWidget
 from RegisterWidget import RegisterWidget
 from LoginWidget import LoginWidget
+
+def fileName():
+    return "nopassword.sqlite"
 
 class NoPasswordWidget(QtWidgets.QWidget):
     def __init__(self):
@@ -30,8 +39,7 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    conn = sqlite3.connect('example.db')
-
+    model = Model(fileName())
     app = QtWidgets.QApplication([])
 
     widget = NoPasswordWidget()
