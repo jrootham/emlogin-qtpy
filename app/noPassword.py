@@ -18,10 +18,10 @@ def fileName():
     return "nopassword.sqlite"
 
 class NoPasswordWidget(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, model):
         super().__init__()
 
-        self.mailboxes = MailboxesWidget()
+        self.mailboxes = MailboxesWidget(model)
         self.connect = ConnectWidget()
         self.register = RegisterWidget()
         self.login = LoginWidget()
@@ -40,9 +40,9 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
 if __name__ == "__main__":
     model = Model(fileName())
-    app = QtWidgets.QApplication([])
+    app = QtWidgets.QApplication()
 
-    widget = NoPasswordWidget()
+    widget = NoPasswordWidget(model)
     widget.resize(600, 800)
     widget.show()
 

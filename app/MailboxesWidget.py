@@ -1,26 +1,33 @@
 from PySide2 import QtCore, QtWidgets
 
 class MailboxesWidget(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, model):
         super().__init__()
 
+        self.model = model
 
         self.title = QtWidgets.QLabel("Mailboxes")
         self.title.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.__pick__()
-        self.__values__()
-        self.__buttons__()
+        self.errors = QtWidgets.QLabel("")
+        self.errors.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.pick()
+        self.values()
+        self.buttons()
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.addWidget(self.title)
         self.layout.addLayout(self.pickBox)
         self.layout.addLayout(self.outerValuesBox)
         self.layout.addLayout(self.buttonBox)
+        self.layout.addWidget(self.errors)
 
         self.setLayout(self.layout)
+        
+        return
 
-    def __pick__(self):
+    def pick(self):
 
         self.pick = QtWidgets.QComboBox()
         self.load = QtWidgets.QPushButton("Load")
@@ -30,8 +37,10 @@ class MailboxesWidget(QtWidgets.QWidget):
         self.pickBox.addWidget(self.load)
         self.pickBox.insertStretch(0)
         self.pickBox.insertStretch(-1)
+        
+        return
 
-    def __values__(self):
+    def values(self):
         self.nameLabel = QtWidgets.QLabel("Mailbox name")
         self.name = QtWidgets.QLineEdit()
 
@@ -54,15 +63,40 @@ class MailboxesWidget(QtWidgets.QWidget):
         self.outerValuesBox.insertStretch(0)
         self.outerValuesBox.insertStretch(-1)
 
-    def __buttons__(self):
+        return
 
+    def buttons(self):
+
+        self.clear = QtWidgets.QPushButton("Clear")
         self.new = QtWidgets.QPushButton("New")
-        self.save = QtWidgets.QPushButton("Save")
+        self.update = QtWidgets.QPushButton("Update")
+        self.delete = QtWidgets.QPushButton("Delete")
 
         self.buttonBox = QtWidgets.QHBoxLayout()
+        self.buttonBox.addWidget(self.clear)
         self.buttonBox.addWidget(self.new)
-        self.buttonBox.addWidget(self.save)
+        self.buttonBox.addWidget(self.update)
+        self.buttonBox.addWidget(self.delete)
         self.buttonBox.insertStretch(0)
         self.buttonBox.insertStretch(-1)
 
-#        self.button.clicked.connect(self.magic)
+        self.clear.clicked.connect(lambda:self.clearData())
+        self.new.clicked.connect(lambda:self.newBox())
+
+        return
+
+    def clearData(self):
+        self.errors.setText("")
+
+        self.name.setText("")
+        self.host.setText("")
+        self.userName.setText("")
+
+        return
+
+    def newBox(self):
+        self.errors.setText("")
+        errors = self.model.addMailbox(self.name.text(), self.host.text(), self.userName.text())
+        self.errors.setText(errors)
+
+        return
