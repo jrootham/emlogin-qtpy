@@ -1,69 +1,59 @@
 from PySide2 import QtCore, QtWidgets
 
+from AddRegisterDialogue import AddRegisterDialogue
+
 class RegisterWidget(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, sites):
         super().__init__()
 
-
-        self.title = QtWidgets.QLabel("Register")
-        self.title.setAlignment(QtCore.Qt.AlignCenter)
-
-        self.__load__()
-        self.__values__()
-        self.__buttons__()
-
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.title)
-        self.layout.addLayout(self.loadBox)
-        self.layout.addLayout(self.outerValuesBox)
-        self.layout.addLayout(self.buttonBox)
+        self.sites = sites
         
-        self.setLayout(self.layout)
+        title = QtWidgets.QLabel("Register")
+        title.setAlignment(QtCore.Qt.AlignCenter)
 
-    def __load__(self):
-        self.dataLabel = QtWidgets.QLabel("Data block")
-        self.data = QtWidgets.QTextEdit()
-        self.loadButton = QtWidgets.QPushButton("Load block")
+        valuesBox = self.values()
+        buttonBox = self.buttons()
 
-        self.loadBox = QtWidgets.QHBoxLayout()
-        self.loadBox.addWidget(self.dataLabel)
-        self.loadBox.addWidget(self.data)
-        self.loadBox.addWidget(self.loadButton)
-        self.loadBox.insertStretch(0)
-        self.loadBox.insertStretch(-1)
-
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(title)
+        layout.addLayout(valuesBox)
+        layout.addLayout(buttonBox)
+        
+        self.setLayout(layout)
 
 
-    def __values__(self):
-        self.nameLabel = QtWidgets.QLabel("Website name")
-        self.name = QtWidgets.QLineEdit()
+    def values(self):
+        nameLabel = QtWidgets.QLabel("Website name")
+        name = QtWidgets.QLineEdit()
 
-        self.hostLabel = QtWidgets.QLabel("Endpoint")
-        self.host = QtWidgets.QLabel("")
+        valuesBox = QtWidgets.QGridLayout()
+        valuesBox.addWidget(nameLabel, 0, 0)
+        valuesBox.addWidget(name, 0, 1)
 
-        self.userNameLabel = QtWidgets.QLabel("Website user name")
-        self.userName = QtWidgets.QLabel("")
+        outerValuesBox = QtWidgets.QHBoxLayout()
+        outerValuesBox.addLayout(valuesBox)
+        outerValuesBox.insertStretch(0)
+        outerValuesBox.insertStretch(-1)
 
-        self.valuesBox = QtWidgets.QGridLayout()
-        self.valuesBox.addWidget(self.nameLabel, 0, 0)
-        self.valuesBox.addWidget(self.name, 0, 1)
-        self.valuesBox.addWidget(self.hostLabel, 1, 0)
-        self.valuesBox.addWidget(self.host, 1, 1)
-        self.valuesBox.addWidget(self.userNameLabel, 2, 0)
-        self.valuesBox.addWidget(self.userName, 2, 1)
+        return outerValuesBox
 
-        self.outerValuesBox = QtWidgets.QHBoxLayout()
-        self.outerValuesBox.addLayout(self.valuesBox)
-        self.outerValuesBox.insertStretch(0)
-        self.outerValuesBox.insertStretch(-1)
+    def buttons(self):
 
-    def __buttons__(self):
+        new = QtWidgets.QPushButton("New")
+        rename = QtWidgets.QPushButton("Rename")
+        delete = QtWidgets.QPushButton("Delete")
 
-        self.new = QtWidgets.QPushButton("Cancel")
-        self.save = QtWidgets.QPushButton("Save")
+        buttonBox = QtWidgets.QHBoxLayout()
+        buttonBox.addWidget(new)
+        buttonBox.addWidget(rename)
+        buttonBox.addWidget(delete)
+        buttonBox.insertStretch(0)
+        buttonBox.insertStretch(-1)
 
-        self.buttonBox = QtWidgets.QHBoxLayout()
-        self.buttonBox.addWidget(self.new)
-        self.buttonBox.addWidget(self.save)
-        self.buttonBox.insertStretch(0)
-        self.buttonBox.insertStretch(-1)
+        new.clicked.connect(self.openNew)
+
+        return buttonBox
+
+    def openNew(self):
+        add = AddRegisterDialogue(self, self.sites)
+        add.exec()
