@@ -27,6 +27,7 @@ class AddRegisterDialogue(QtWidgets.QDialog):
 
         nameLabel = QtWidgets.QLabel("Site name")
         self.nameEdit = QtWidgets.QLineEdit()
+        self.nameEdit.textChanged.connect(self.updateName)
 
         endpointLabel = QtWidgets.QLabel("Endpoint")
         self.endpointValue = QtWidgets.QLabel("")
@@ -75,4 +76,8 @@ class AddRegisterDialogue(QtWidgets.QDialog):
             self.accept()
         else:
             self.messages.setText(self.name + " already exists")
+        
+    def updateName(self):
+        self.name = self.nameEdit.text()
+
         
