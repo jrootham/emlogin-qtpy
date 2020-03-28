@@ -22,7 +22,6 @@ class Sites(object):
 
     def exists(self, name):
         """Check if site name exists"""
-        print ("In exists ", name)
         return name in self.sites
 
 

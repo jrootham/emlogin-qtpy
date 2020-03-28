@@ -10,7 +10,7 @@ from RegisterWidget import RegisterWidget
 from LoginWidget import LoginWidget
 
 """
-noPassweord is an applicatioin designed to make it easier to login to sites that support the noPassword 
+noPassword is an applicatioin designed to make it easier to login to sites that support the noPassword 
 protocal.
 
 
@@ -24,15 +24,15 @@ class NoPasswordWidget(QtWidgets.QWidget):
         super().__init__()
 
         self.mailboxes = MailboxesWidget(controller.getMailboxes())
-        self.connect = ConnectWidget()
+        self.connect = ConnectWidget(controller.getMailboxes())
         self.register = RegisterWidget(controller.getSites())
-        self.login = LoginWidget()
+        self.login = LoginWidget(controller.getMailboxes(), controller.getSites())
 
         self.layout = QtWidgets.QVBoxLayout()
 
         self.layout.addWidget(self.mailboxes)
-        self.layout.addWidget(self.connect)
         self.layout.addWidget(self.register)
+        self.layout.addWidget(self.connect)
         self.layout.addWidget(self.login)
         
         self.layout.insertStretch(-1)

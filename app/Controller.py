@@ -16,6 +16,8 @@ class Controller(object):
         self.mailboxes = Mailboxes(self.connection)
         self.sites = Sites(self.connection)
 
+        self.host = ""
+        self.userName = ""
 
     def getMailboxes(self):
         return self.mailboxes
@@ -23,4 +25,11 @@ class Controller(object):
 
     def getSites(self):
         return self.sites
+
+    def setCurrentMailbox(self, host, userName):
+        self.host = host
+        self.userName = userName
+
+    def doConnect():
+        pass
         

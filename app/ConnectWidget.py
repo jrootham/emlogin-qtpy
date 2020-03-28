@@ -1,31 +1,35 @@
 from PySide2 import QtCore, QtWidgets
 
 class ConnectWidget(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
 
+        self.controller = controller
 
-        self.title = QtWidgets.QLabel("Connect")
-        self.title.setAlignment(QtCore.Qt.AlignCenter)
+        title = QtWidgets.QLabel("Connect")
+        title.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.passwordLabel = QtWidgets.QLabel("Password")
+        passwordLabel = QtWidgets.QLabel("Password")
 
         self.password = QtWidgets.QLineEdit()
         self.password.setEchoMode(QtWidgets.QLineEdit.Password)
 
-        self.connectButton = QtWidgets.QPushButton("Connect")
+        connectButton = QtWidgets.QPushButton("Connect")
+        connectButton.clicked.connect(self.doConnect)
 
-        self.passwordBox = QtWidgets.QHBoxLayout()
-        self.passwordBox.addWidget(self.passwordLabel)
-        self.passwordBox.addWidget(self.password)
-        self.passwordBox.addWidget(self.connectButton)
+        passwordBox = QtWidgets.QHBoxLayout()
+        passwordBox.addWidget(passwordLabel)
+        passwordBox.addWidget(self.password)
+        passwordBox.addWidget(connectButton)
 
-        self.passwordBox.insertStretch(0)
-        self.passwordBox.insertStretch(-1)
+        passwordBox.insertStretch(0)
+        passwordBox.insertStretch(-1)
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.title)
-        self.layout.addLayout(self.passwordBox)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(title)
+        layout.addLayout(passwordBox)
 
-        self.setLayout(self.layout)
+        self.setLayout(layout)
 
+    def doConnect(self):
+        self.controller.doConnect()

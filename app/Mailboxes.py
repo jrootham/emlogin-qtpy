@@ -22,6 +22,9 @@ class Mailboxes(object):
             self.mailboxes[name] = (host, userName)
 
 
+    def exists(self, name):
+        return name in self.mailboxes
+
     def getNames(self):
         """Get the list of names for the dropdown """
 

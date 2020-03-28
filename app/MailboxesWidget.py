@@ -8,24 +8,24 @@ class MailboxesWidget(QtWidgets.QWidget):
 
         self.mailboxes = mailboxes
 
-        self.title = QtWidgets.QLabel("Mailboxes")
-        self.title.setAlignment(QtCore.Qt.AlignCenter)
+        title = QtWidgets.QLabel("Mailboxes")
+        title.setAlignment(QtCore.Qt.AlignCenter)
 
         self.messages = QtWidgets.QLabel("")
         self.messages.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.pick(self.mailboxes.getNames())
-        self.values()
-        self.buttons()
+        pickBox = self.pick(self.mailboxes.getNames())
+        valuesBox = self.values()
+        buttonBox = self.buttons()
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.title)
-        self.layout.addLayout(self.pickBox)
-        self.layout.addLayout(self.outerValuesBox)
-        self.layout.addLayout(self.buttonBox)
-        self.layout.addWidget(self.messages)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(title)
+        layout.addLayout(pickBox)
+        layout.addLayout(valuesBox)
+        layout.addLayout(buttonBox)
+        layout.addWidget(self.messages)
 
-        self.setLayout(self.layout)
+        self.setLayout(layout)
         
 
     def pick(self, nameList):
@@ -33,58 +33,63 @@ class MailboxesWidget(QtWidgets.QWidget):
         self.pick = QtWidgets.QComboBox()
         self.pick.addItems(nameList)
 
-        self.load = QtWidgets.QPushButton("Load")
-        self.load.clicked.connect(lambda:self.loadData())
+        load = QtWidgets.QPushButton("Load")
+        load.clicked.connect(lambda:self.loadData())
 
-        self.pickBox = QtWidgets.QHBoxLayout()
-        self.pickBox.addWidget(self.pick)
-        self.pickBox.addWidget(self.load)
-        self.pickBox.insertStretch(0)
-        self.pickBox.insertStretch(-1)
+        pickBox = QtWidgets.QHBoxLayout()
+        pickBox.addWidget(self.pick)
+        pickBox.addWidget(load)
+        pickBox.insertStretch(0)
+        pickBox.insertStretch(-1)
+
+        return pickBox
         
     def values(self):
-        self.nameLabel = QtWidgets.QLabel("Mailbox name")
+        nameLabel = QtWidgets.QLabel("Mailbox name")
         self.name = QtWidgets.QLineEdit()
 
-        self.hostLabel = QtWidgets.QLabel("Host")
+        hostLabel = QtWidgets.QLabel("Host")
         self.host = QtWidgets.QLineEdit()
 
-        self.userNameLabel = QtWidgets.QLabel("User name")
+        userNameLabel = QtWidgets.QLabel("User name")
         self.userName = QtWidgets.QLineEdit()
 
-        self.valuesBox = QtWidgets.QGridLayout()
-        self.valuesBox.addWidget(self.nameLabel, 0, 0)
-        self.valuesBox.addWidget(self.name, 0, 1)
-        self.valuesBox.addWidget(self.hostLabel, 1, 0)
-        self.valuesBox.addWidget(self.host, 1, 1)
-        self.valuesBox.addWidget(self.userNameLabel, 2, 0)
-        self.valuesBox.addWidget(self.userName, 2, 1)
+        valuesBox = QtWidgets.QGridLayout()
+        valuesBox.addWidget(nameLabel, 0, 0)
+        valuesBox.addWidget(self.name, 0, 1)
+        valuesBox.addWidget(hostLabel, 1, 0)
+        valuesBox.addWidget(self.host, 1, 1)
+        valuesBox.addWidget(userNameLabel, 2, 0)
+        valuesBox.addWidget(self.userName, 2, 1)
 
-        self.outerValuesBox = QtWidgets.QHBoxLayout()
-        self.outerValuesBox.addLayout(self.valuesBox)
-        self.outerValuesBox.insertStretch(0)
-        self.outerValuesBox.insertStretch(-1)
+        outerValuesBox = QtWidgets.QHBoxLayout()
+        outerValuesBox.addLayout(valuesBox)
+        outerValuesBox.insertStretch(0)
+        outerValuesBox.insertStretch(-1)
+
+        return outerValuesBox
 
     def buttons(self):
 
-        self.clear = QtWidgets.QPushButton("Clear")
-        self.new = QtWidgets.QPushButton("New")
-        self.update = QtWidgets.QPushButton("Update")
-        self.delete = QtWidgets.QPushButton("Delete")
+        clear = QtWidgets.QPushButton("Clear")
+        new = QtWidgets.QPushButton("New")
+        update = QtWidgets.QPushButton("Update")
+        delete = QtWidgets.QPushButton("Delete")
 
-        self.buttonBox = QtWidgets.QHBoxLayout()
-        self.buttonBox.addWidget(self.clear)
-        self.buttonBox.addWidget(self.new)
-        self.buttonBox.addWidget(self.update)
-        self.buttonBox.addWidget(self.delete)
-        self.buttonBox.insertStretch(0)
-        self.buttonBox.insertStretch(-1)
+        buttonBox = QtWidgets.QHBoxLayout()
+        buttonBox.addWidget(clear)
+        buttonBox.addWidget(new)
+        buttonBox.addWidget(update)
+        buttonBox.addWidget(delete)
+        buttonBox.insertStretch(0)
+        buttonBox.insertStretch(-1)
 
-        self.clear.clicked.connect(lambda:self.clearData())
-        self.new.clicked.connect(lambda:self.newBox())
-        self.update.clicked.connect(lambda:self.updateBox())
-        self.delete.clicked.connect(lambda:self.deleteBox())
+        clear.clicked.connect(self.clearData)
+        new.clicked.connect(self.newBox)
+        update.clicked.connect(self.updateBox)
+        delete.clicked.connect(self.deleteBox)
 
+        return buttonBox
 #
 #   functions connected to buttons to do things
 #
@@ -92,11 +97,16 @@ class MailboxesWidget(QtWidgets.QWidget):
     def loadData(self):
         self.messages.setText("")
         
-        name, host, userName = self.mailboxes.getMailbox(self.pick.currentText())
+        name = self.pick.currentText()
 
-        self.name.setText(name)
-        self.host.setText(host)
-        self.userName.setText(userName)
+        if self.mailboxes.exists(name):
+            name, host, userName = self.mailboxes.getMailbox(name)
+
+            self.name.setText(name)
+            self.host.setText(host)
+            self.userName.setText(userName)
+        else:
+            self.messages.setText(name + " does not exist")
 
     def clearData(self):
         self.messages.setText("")
@@ -129,26 +139,33 @@ class MailboxesWidget(QtWidgets.QWidget):
         host = self.host.text()
         userName = self.userName.text()
 
-        messages = self.mailboxes.updateMailbox(name, host, userName)
+        if self.mailboxes.exists(name):
+            messages = self.mailboxes.updateMailbox(name, host, userName)
 
-        if 0 == len(messages):
-            self.messages.setText("Update successful")
+            if 0 == len(messages):
+                self.messages.setText("Update successful")
 
+            else:
+                self.messages.setText(messages)
         else:
-            self.messages.setText(messages)
+            self.messages.setText(name + " does not exist")
+
 
     def deleteBox(self):
         self.messages.setText("")
         
         name = self.name.text()
 
-        messages = self.mailboxes.deleteMailbox(name)
+        if self.mailboxes.exists(name):
+            messages = self.mailboxes.deleteMailbox(name)
 
-        if 0 == len(messages):
-            self.clearData()
-            self.pick.removeItem(self.pick.currentIndex())
+            if 0 == len(messages):
+                self.clearData()
+                self.pick.removeItem(self.pick.currentIndex())
 
-            self.messages.setText("Delete successful")
+                self.messages.setText("Delete successful")
 
+            else:
+                self.messages.setText(messages)
         else:
-            self.messages.setText(messages)
+            self.messages.setText(name + " does not exist")
