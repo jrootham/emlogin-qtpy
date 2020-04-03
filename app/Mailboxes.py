@@ -63,7 +63,7 @@ class Mailboxes(object):
     def updateMailbox(self, mailboxId, address, host, userName):
         """Update valid mailbox in local mailboxes and database mailboxes"""
 
-        messages = self.updateBoxValidation(address, host, userName)
+        messages = self.updateBoxValidation(mailboxId, address, host, userName)
         if 0 == len(messages):
             cursor = self.connection.cursor()
             
@@ -108,12 +108,19 @@ class Mailboxes(object):
 
         return messages
 
-    def updateBoxValidation(self, address, host, userName):
+    def updateBoxValidation(self, mailboxId, address, host, userName):
         """
         Confirm no mailbox data is empty
+        Confirm new name does not exist
         """
+
         messages = self.boxValidation(address, host, userName)
 
+        if address in self.mailboxes:
+            target = self.mailboxes[address]
+            if target[0] != mailboxId:
+                messages += common.exists(address, self.mailboxes)
+                
         return messages
 
     def boxValidation(self, address, host, userName):
