@@ -17,98 +17,108 @@ class Mailboxes(object):
 
         cursor = self.connection.cursor()
 
-        for row in cursor.execute("SELECT name, host, user_name FROM mailboxes;"):
-            name, host, userName = row
-            self.mailboxes[name] = (host, userName)
+        for data in cursor.execute("SELECT mailbox_id, address, host, user_name FROM mailboxes;"):
+            mailboxId, address, host, userName = data
+            self.mailboxes[address] = (mailboxId, host, userName)
 
 
-    def exists(self, name):
-        return name in self.mailboxes
+    def exists(self, adress):
+        return address in self.mailboxes
 
-    def getNames(self):
-        """Get the list of names for the dropdown """
+    def getMailboxList(self):
+        """Get the list of addreses for the dropdown """
 
         return sorted(self.mailboxes)
 
-    def getMailbox(self, name):
+    def getMailbox(self, address):
         """Get data for a mailbox"""
 
-        host, userName = self.mailboxes[name]
-        return (name, host, userName)
+        mailboxId, host, userName = self.mailboxes[address]
+        return (mailboxId, address, host, userName)
 
 
-    def addMailbox(self, name, host, userName):
+    def addMailbox(self, address, host, userName):
         """Add valid new mailbox to local mailboxes and database mailboxes"""
 
-        messages = self.addBoxValidation(name, host, userName)
+        messages = self.addBoxValidation(address, host, userName)
         if 0 == len(messages):
-            self.mailboxes[name] = (host, userName)
             
-            insert = "INSERT INTO mailboxes (name, host, user_name) VALUES (?, ?, ?);"
             cursor = self.connection.cursor()
-            cursor.execute(insert, (name, host, userName))
+
+            insert = "INSERT INTO mailboxes (address, host, user_name) VALUES (?, ?, ?);"
+            cursor.execute(insert, (address, host, userName))
+            
+            cursor.execute("SELECT mailbox_id FROM mailboxes WHERE address=?;", (address,))
+            mailboxId, = cursor.fetchone()
+
+            self.mailboxes[address] = (mailboxId, host, userName)
+
             self.connection.commit()
 
             return ""
+
         else:
             return messages
 
-    def updateMailbox(self, name, host, userName):
+    def updateMailbox(self, mailboxId, address, host, userName):
         """Update valid mailbox in local mailboxes and database mailboxes"""
 
-        messages = self.updateBoxValidation(name, host, userName)
+        messages = self.updateBoxValidation(address, host, userName)
         if 0 == len(messages):
-            self.mailboxes[name] = (host, userName)
-            
-            update = "UPDATE mailboxes SET host=?, user_name=? WHERE name=?;"
             cursor = self.connection.cursor()
+            
+            cursor.execute("SELECT address FROM mailboxes WHERE mailbox_id=?", (mailboxId,))
+            oldAddress, = cursor.fetchone()
 
-            cursor.execute(update, (host, userName, name))
+            update = "UPDATE mailboxes SET address=?, host=?, user_name=? WHERE mailbox_id=?;"
+            cursor.execute(update, (address, host, userName, mailboxId))
+
+            del self.mailboxes[oldAddress]
+            self.mailboxes[address] = (mailboxId, host, userName)
+
             self.connection.commit()
             
             return ""
         else:
             return messages
 
-    def deleteMailbox(self, name):
+    def deleteMailbox(self, address):
         """Delete existing mailbox"""
-        messages = common.notExists(name, self.mailboxes)
+        messages = common.notExists(address, self.mailboxes)
         if (0 == len(messages)):
-            del self.mailboxes[name]
+            mailboxId, host, userName = self.mailboxes[address]
+
+            del self.mailboxes[address]
 
             cursor = self.connection.cursor()
-            delete = "DELETE FROM mailboxes WHERE name=?;"
-
-            cursor.execute(delete, (name,))
+            cursor.execute("DELETE FROM mailboxes WHERE mailbox_id=?;", (mailboxId,))
             self.connection.commit()
 
             return ""
         else:
             return messages
 
-    def addBoxValidation(self, name, host, userName):
+    def addBoxValidation(self, address, host, userName):
         """
         Confirm no mailbox data is empty
-        Confirm unique name for new mailbox
+        Confirm unique address for new mailbox
         """
-        messages = self.boxValidation(name, host, userName)
-        messages += common.exists(name, self.mailboxes)
+        messages = self.boxValidation(address, host, userName)
+        messages += common.exists(address, self.mailboxes)
 
         return messages
 
-    def updateBoxValidation(self, name, host, userName):
+    def updateBoxValidation(self, address, host, userName):
         """
         Confirm no mailbox data is empty
-        Confirm name exists
         """
-        messages = self.boxValidation(name, host, userName)
-        messages += common.notExists(name, self.mailboxes)
+        messages = self.boxValidation(address, host, userName)
 
         return messages
 
-    def boxValidation(self, name, host, userName):
+    def boxValidation(self, address, host, userName):
         """Confirm no mailbox data is empty"""
-        messages = common.empty("Name", name)
+        messages = common.empty("Address", address)
         messages += common.empty("Host", host)
         messages += common.empty("User name", userName)
 

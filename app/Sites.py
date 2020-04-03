@@ -14,7 +14,7 @@ class Sites(object):
             self.sites[name] = (endpoint, identifier)
 
 
-    def getNames(self):
+    def getSiteList(self):
         """Get the list of names for the dropdown """
 
         return sorted(self.sites)

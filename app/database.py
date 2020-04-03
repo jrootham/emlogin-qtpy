@@ -9,18 +9,22 @@ def makeConnection(fileName):
     cursor.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='config'")
 
     if cursor.fetchone()[0] != 1 :            # if first table not there, create all of them
-        cursor.execute("CREATE TABLE config (version INTEGER);")
+        cursor.execute("CREATE TABLE config (config_id INTEGER PRIMARY KEY, version INTEGER);")
         cursor.execute("INSERT INTO config (version) VALUES(1)")
 
-        name = "name TEXT UNIQUE"
+        mailboxId = "mailbox_id INTEGER PRIMARY KEY"
+        address = "address TEXT UNIQUE"
         host = "host TEXT"
         userName = "user_name TEXT"
-        mailboxes = "CREATE TABLE mailboxes ({}, {}, {});".format(name, host, userName)
+        statement = "CREATE TABLE mailboxes ({}, {}, {}, {});"
+        mailboxes = statement.format(mailboxId, address, host, userName)
         cursor.execute(mailboxes)
 
+        sitesId = "site_id INTEGER PRIMARY KEY"
+        name = "name TEXT UNIQUE"
         endpoint = "endpoint TEXT"
         identifier = "identifier TEXT"
-        sites = "CREATE TABLE sites ({}, {}, {});".format(name, endpoint, identifier)
+        sites = "CREATE TABLE sites ({}, {}, {}, {});".format(sitesId, name, endpoint, identifier)
         cursor.execute(sites)
 
         conn.commit()
