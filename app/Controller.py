@@ -1,3 +1,5 @@
+import secrets
+import requests
 
 from Mailboxes import Mailboxes
 from Sites import Sites
@@ -17,6 +19,8 @@ class Controller(object):
         self.mailboxes = Mailboxes(self.connection)
         self.sites = Sites(self.connection)
         self.passwords = {}
+
+
 
     def getMailboxList(self):
         return self.mailboxes.getMailboxList()
@@ -41,10 +45,11 @@ class Controller(object):
     def getSite(self, name):
         return self.sites.getSite(name)
 
-    def addSite(name, endpoint, identifier):
+    def addSite(self, name, endpoint, identifier):
+        print(name, endpoint, identifier)
         return self.sites.addSite(name, endpoint, identifier)
 
-    def renameSite(self, name, host, userName):
+    def renameSite(self, oldName, newName):
         return self.sites.renameSite(oldName, newName)
 
     def deleteSite(self, name):
@@ -53,4 +58,15 @@ class Controller(object):
 
 
     def login(self, name):
-        pass
+        self.token = secrets.token_hex(16)
+        if self.sites.exists(name):
+            siteId, name, endpoint, identifier = self.sites.getSite(name)
+            payload = {"identifier": identifier, "token": self.token}
+            response = requests.get(endpoint, payload)
+            if response.status_code == requests.codes.ok:
+                self.readEmail()
+            else:
+                return response.text
+                # Errors
+        else:
+            return name + " does not exist"

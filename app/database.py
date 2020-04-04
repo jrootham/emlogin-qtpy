@@ -20,11 +20,11 @@ def makeConnection(fileName):
         mailboxes = statement.format(mailboxId, address, host, userName)
         cursor.execute(mailboxes)
 
-        sitesId = "site_id INTEGER PRIMARY KEY"
+        siteId = "site_id INTEGER PRIMARY KEY"
         name = "name TEXT UNIQUE"
         endpoint = "endpoint TEXT"
         identifier = "identifier TEXT"
-        sites = "CREATE TABLE sites ({}, {}, {}, {});".format(sitesId, name, endpoint, identifier)
+        sites = "CREATE TABLE sites ({}, {}, {}, {});".format(siteId, name, endpoint, identifier)
         cursor.execute(sites)
 
         conn.commit()

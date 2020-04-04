@@ -9,9 +9,9 @@ class Sites(object):
 
         cursor = self.connection.cursor()
 
-        for row in cursor.execute("SELECT name, endpoint, identifier FROM sites;"):
-            name, endpoint, identifier = row
-            self.sites[name] = (endpoint, identifier)
+        for row in cursor.execute("SELECT site_id, name, endpoint, identifier FROM sites;"):
+            siteId, name, endpoint, identifier = row
+            self.sites[name] = (siteId, endpoint, identifier)
 
 
     def getSiteList(self):
@@ -28,8 +28,8 @@ class Sites(object):
     def getSite(self, name):
         """Get data for a site"""
 
-        endpoint, identifier = self.sites[name]
-        return (name, endpoint, identifier)
+        siteId, endpoint, identifier = self.sites[name]
+        return (siteId, name, endpoint, identifier)
 
 
     def addSite(self, name, endpoint, identifier):
@@ -37,11 +37,17 @@ class Sites(object):
 
         messages = self.addSiteValidation(name, endpoint, identifier)
         if 0 == len(messages):
-            self.sites[name] = (endpoint, identifier)
             
-            insert = "INSERT INTO sites (name, endpoint, identifier) VALUES (?, ?, ?);"
             cursor = self.connection.cursor()
+
+            insert = "INSERT INTO sites (name, endpoint, identifier) VALUES (?, ?, ?);"
             cursor.execute(insert, (name, endpoint, identifier))
+
+            cursor.execute("SELECT site_id FROM sites WHERE name=?;", (name,))
+            siteId, = cursor.fetchone()
+
+            self.sites[name] = (siteId, endpoint, identifier)
+
             self.connection.commit()
 
             return ""
@@ -49,17 +55,19 @@ class Sites(object):
             return messages
 
 
-    def updateSite(self, name, endpoint, identifier):
+    def renameSite(self, oldName, newName):
         """Update valid site in local sites and database sites"""
 
-        messages = self.updateSiteValidation(name, endpoint, identifier)
+        messages = self.renameSiteValidation(oldName, newName)
         if 0 == len(messages):
-            self.sites[name] = (endpoint, identifier)
-            
-            update = "UPDATE sites SET endpoint=?, identifier=? WHERE name=?;"
+            self.sites[newName] = self.sites[oldName]
+            del self.sites[oldName]
+
+            siteId = self.sites[newName][0]
+
             cursor = self.connection.cursor()
 
-            cursor.execute(update, (endpoint, identifier, name))
+            cursor.execute("UPDATE sites SET name=? WHERE site_id=?;", (siteId,))
             self.connection.commit()
             
             return ""
@@ -95,13 +103,17 @@ class Sites(object):
         return messages
 
 
-    def updateSiteValidation(self, name, endpoint, identifier):
+    def renameSiteValidation(self, newName, oldName):
         """
-        Confirm no site data is empty
-        Confirm name exists
         """
-        messages = self.siteValidation(name, endpoint, identifier)
-        messages += common.notExists(name, self.sites)
+        messages = ""
+        
+        if newName != oldName:
+            messages = common.empty("Name", newName)
+            messages += common.notExists(newName, self.sites)
+
+        else:
+            messages = "Name not changed"
 
         return messages
 

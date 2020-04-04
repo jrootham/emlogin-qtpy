@@ -44,14 +44,15 @@ class NoPasswordWidget(QtWidgets.QWidget):
         sitesView.display(self.controller, self)
 
     def addSite(self, name):
-        pass
+        self.pickSite.addItem(name)
+        self.pickSite.model().sort(0)
 
     def deleteSite(self, name):
-        pass
+        self.pickSite.removeItem(self.pickSite.findText(name))
 
     def login(self):
         if self.pickSite.currentText() != "":
-            print(self.pickSite.currentText())
+            self.controller.login(self.pickSite.currentText())
         else:
             self.messages.setText("No site available")
 
