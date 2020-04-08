@@ -17,16 +17,9 @@ class PickSite(QtWidgets.QDialog):
         layout.addLayout(commonView.horizontalPair(label, self.pick))
         layout.insertStretch(-1)
 
-        buttons = QtWidgets.QDialogButtonBox(
-        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-        QtCore.Qt.Horizontal, self)
-        layout.addWidget(buttons)
-        layout.insertStretch(-1)
+        commonView.buttons(self, layout, self.save)
 
         self.setLayout(layout)
-
-        buttons.accepted.connect(self.save)
-        buttons.rejected.connect(self.reject)
 
     def save(self):
         self.picked = self.pick.currentText()
@@ -50,26 +43,20 @@ class AddSite(QtWidgets.QDialog):
 
         layout.insertStretch(-1)
 
-        buttons = QtWidgets.QDialogButtonBox(
-        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-        QtCore.Qt.Horizontal, self)
-        layout.addWidget(buttons)
+        commonView.buttons(self, layout, self.save)
+
+        self.messages = QtWidgets.QLabel(" ")
+
+        layout.addLayout(commonView.horizontal(self.messages))
         layout.insertStretch(-1)
 
         self.setLayout(layout)
 
-        self.messages = QtWidgets.QLabel(" ")
-        layout.addLayout(commonView.horizontal(self.messages))
-        layout.insertStretch(-1)
-
-        buttons.accepted.connect(self.save)
-        buttons.rejected.connect(self.reject)
-
     def save(self):
         text = self.data.toPlainText()
-        name, endpoint, identifier = text.split("\n")
+        name, endpoint, identifier, address = text.split("\n")
         
-        messages = self.controller.addSite(name, endpoint, identifier)
+        messages = self.controller.addSite(name, endpoint, identifier, address)
         if len(messages) == 0:
             self.picker.addSite(name)
             self.accept()
@@ -94,20 +81,13 @@ class RenameSite(QtWidgets.QDialog):
 
         layout.insertStretch(-1)
 
-        buttons = QtWidgets.QDialogButtonBox(
-        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-        QtCore.Qt.Horizontal, self)
-        layout.addWidget(buttons)
-        layout.insertStretch(-1)
+        commonView.buttons(self, layout, self.save)
 
         self.messages = QtWidgets.QLabel(" ")
         layout.addLayout(commonView.horizontal(self.messages))
         layout.insertStretch(-1)
 
         self.setLayout(layout)
-
-        buttons.accepted.connect(self.save)
-        buttons.rejected.connect(self.reject)
 
     def save(self):
         newName = self.newName.text()

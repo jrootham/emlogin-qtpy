@@ -9,9 +9,9 @@ class Sites(object):
 
         cursor = self.connection.cursor()
 
-        for row in cursor.execute("SELECT site_id, name, endpoint, identifier FROM sites;"):
-            siteId, name, endpoint, identifier = row
-            self.sites[name] = (siteId, endpoint, identifier)
+        for row in cursor.execute("SELECT site_id, name, endpoint, identifier, address FROM sites;"):
+            siteId, name, endpoint, identifier, address = row
+            self.sites[name] = (siteId, endpoint, identifier, address)
 
 
     def getSiteList(self):
@@ -28,25 +28,25 @@ class Sites(object):
     def getSite(self, name):
         """Get data for a site"""
 
-        siteId, endpoint, identifier = self.sites[name]
-        return (siteId, name, endpoint, identifier)
+        siteId, endpoint, identifier, address = self.sites[name]
+        return (siteId, name, endpoint, identifier, address)
 
 
-    def addSite(self, name, endpoint, identifier):
+    def addSite(self, name, endpoint, identifier, address):
         """Add valid new site to local sites and database sitess"""
 
-        messages = self.addSiteValidation(name, endpoint, identifier)
+        messages = self.addSiteValidation(name, endpoint, identifier, address)
         if 0 == len(messages):
             
             cursor = self.connection.cursor()
 
-            insert = "INSERT INTO sites (name, endpoint, identifier) VALUES (?, ?, ?);"
-            cursor.execute(insert, (name, endpoint, identifier))
+            insert = "INSERT INTO sites (name, endpoint, identifier, address) VALUES (?, ?, ?, ?);"
+            cursor.execute(insert, (name, endpoint, identifier, address))
 
             cursor.execute("SELECT site_id FROM sites WHERE name=?;", (name,))
             siteId, = cursor.fetchone()
 
-            self.sites[name] = (siteId, endpoint, identifier)
+            self.sites[name] = (siteId, endpoint, identifier, address)
 
             self.connection.commit()
 
@@ -67,7 +67,7 @@ class Sites(object):
 
             cursor = self.connection.cursor()
 
-            cursor.execute("UPDATE sites SET name=? WHERE site_id=?;", (siteId,))
+            cursor.execute("UPDATE sites SET name=? WHERE site_id=?;", (newName, siteId))
             self.connection.commit()
             
             return ""
@@ -92,12 +92,12 @@ class Sites(object):
             return messages
 
 
-    def addSiteValidation(self, name, endpoint, identifier):
+    def addSiteValidation(self, name, endpoint, identifier, address):
         """
         Confirm no site data is empty
         Confirm unique name for new site
         """
-        messages = self.siteValidation(name, endpoint, identifier)
+        messages = self.siteValidation(name, endpoint, identifier, address)
         messages += common.exists(name, self.sites)
 
         return messages
@@ -118,11 +118,12 @@ class Sites(object):
         return messages
 
 
-    def siteValidation(self, name, endpoint, identifier):
+    def siteValidation(self, name, endpoint, identifier, address):
         """Confirm no site data is empty"""
         messages = common.empty("Name", name)
         messages += common.empty("Endpoint", endpoint)
         messages += common.empty("Identifier", identifier)
+        messages += common.empty("Address", address)
 
         return messages
 

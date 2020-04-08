@@ -1,11 +1,30 @@
+import time
 import secrets
 import requests
+from imaplib import IMAP4_SSL
+import mailparser
+from html.parser import HTMLParser
+from PySide2.QtGui import QDesktopServices
 
 from Mailboxes import Mailboxes
 from Sites import Sites
-
 import database
 import view
+
+class ParseLink(HTMLParser):
+    """docstring for ParseLink"""
+    def __init__(self):
+        super(ParseLink, self).__init__()
+
+        self.link = ""
+        
+    def handle_starttag(self, start, attributes):
+        if "meta" == start:
+            print(attributes)
+            if ('name', 'np-target') in attributes:
+                pairList = [pair for pair in attributes if 'content' in pair]
+                self.link = pairList.pop()[1]
+
 
 class Controller(object):
     """
@@ -18,7 +37,7 @@ class Controller(object):
 
         self.mailboxes = Mailboxes(self.connection)
         self.sites = Sites(self.connection)
-        self.passwords = {}
+        self.passwordDict = {}
 
 
 
@@ -45,9 +64,8 @@ class Controller(object):
     def getSite(self, name):
         return self.sites.getSite(name)
 
-    def addSite(self, name, endpoint, identifier):
-        print(name, endpoint, identifier)
-        return self.sites.addSite(name, endpoint, identifier)
+    def addSite(self, name, endpoint, identifier, address):
+        return self.sites.addSite(name, endpoint, identifier, address)
 
     def renameSite(self, oldName, newName):
         return self.sites.renameSite(oldName, newName)
@@ -55,18 +73,83 @@ class Controller(object):
     def deleteSite(self, name):
         return self.sites.deleteSite(name)
 
-
-
     def login(self, name):
-        self.token = secrets.token_hex(16)
+        token = secrets.token_hex(16)
         if self.sites.exists(name):
-            siteId, name, endpoint, identifier = self.sites.getSite(name)
-            payload = {"identifier": identifier, "token": self.token}
+            siteId, name, endpoint, identifier, address = self.sites.getSite(name)
+            payload = {"identifier": identifier, "token": token}
             response = requests.get(endpoint, payload)
             if response.status_code == requests.codes.ok:
-                self.readEmail()
+                return self.readEmail(token, address)
             else:
                 return response.text
-                # Errors
+
         else:
             return name + " does not exist"
+
+
+    def readEmail(self, token, address):
+        mailboxId, address, host, userName = self.getMailbox(address)
+
+        if address in self.passwordDict:
+            password = self.passwordDict[address]
+        else:
+            password = view.getPassword()
+            if 0 != len(password):
+                self.passwordDict[address] = password
+            else:
+                return ""  # User cancelled the prompt
+
+        imap = IMAP4_SSL(host=host)        
+        imap.login(userName, password)
+
+        imap.select()
+
+        subject = '"[#! nopassword {}]"'.format(token)
+
+        num = b''
+        count = 0
+        delay = 1
+
+        while 0 == len(num):
+            error, result = imap.search(None, "SUBJECT " + subject)
+            num = result[0]
+            print('Try')
+            time.sleep(delay)
+            delay *= 2
+            count += 1
+            if 6 < count:
+                break
+
+        if 0 != len(num):
+            if b' ' not in num:
+                typ, data = imap.fetch(num, '(RFC822)')
+                mail = mailparser.parse_from_bytes(data[0][1])
+                htmlParser = ParseLink()
+                htmlParser.feed(mail.body)
+
+                url = htmlParser.link
+                if 0 != len(url):
+                    QDesktopServices.openUrl(url)
+
+                    imap.store(num, '+FLAGS', '\\Deleted')
+                    imap.expunge()                    
+                    imap.close()
+                    imap.logout()
+
+                    return ""
+                else:
+                    imap.close()
+                    imap.logout()
+                    return "URL not found in mail"
+
+            else:
+                imap.close()
+                imap.logout()
+                return "More than one email"
+
+        else:
+            imap.close()
+            imap.logout()
+            return "Email not found"
+

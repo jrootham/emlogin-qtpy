@@ -24,7 +24,9 @@ def makeConnection(fileName):
         name = "name TEXT UNIQUE"
         endpoint = "endpoint TEXT"
         identifier = "identifier TEXT"
-        sites = "CREATE TABLE sites ({}, {}, {}, {});".format(siteId, name, endpoint, identifier)
+        siteAddress = "address TEXT"
+        create = "CREATE TABLE sites ({}, {}, {}, {}, {});"
+        sites = create.format(siteId, name, endpoint, identifier, siteAddress)
         cursor.execute(sites)
 
         conn.commit()

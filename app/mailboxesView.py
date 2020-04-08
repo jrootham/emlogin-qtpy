@@ -18,16 +18,9 @@ class PickMailbox(QtWidgets.QDialog):
         layout.addLayout(commonView.horizontalPair(label, self.pick))
         layout.insertStretch(-1)
 
-        buttons = QtWidgets.QDialogButtonBox(
-        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-        QtCore.Qt.Horizontal, self)
-        layout.addWidget(buttons)
-        layout.insertStretch(-1)
+        commonView.buttons(self, layout, self.save)
 
         self.setLayout(layout)
-
-        buttons.accepted.connect(self.save)
-        buttons.rejected.connect(self.reject)
 
     def save(self):
         self.picked = self.pick.currentText()

@@ -4,6 +4,41 @@ import commonView
 import mailboxesView
 import sitesView
 
+class Password(QtWidgets.QDialog):
+    """docstring for Password"""
+    def __init__(self):
+        super(Password, self).__init__()
+
+        self.password = ""
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.insertStretch(0)
+
+        passwordLabel = QtWidgets.QLabel("Password")
+        self.passwordEdit = QtWidgets.QLineEdit()
+        self.passwordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+
+        layout.addLayout(commonView.horizontalPair(passwordLabel, self.passwordEdit))
+        layout.insertStretch(-1)
+
+        commonView.buttons(self, layout, self.save)
+
+        self.setLayout(layout)
+
+    def save(self):
+        self.password = self.passwordEdit.text()
+        self.accept()
+
+def getPassword():
+    widget = Password()
+    widget.passwordEdit.setFocus()
+    if widget.exec():
+        return widget.password
+    else:
+        return ""
+
+
+        
 class NoPasswordWidget(QtWidgets.QWidget):
     def __init__(self, controller):
         super().__init__()
@@ -52,7 +87,8 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
     def login(self):
         if self.pickSite.currentText() != "":
-            self.controller.login(self.pickSite.currentText())
+            errors = self.controller.login(self.pickSite.currentText())
+            self.messages.setText(errors)
         else:
             self.messages.setText("No site available")
 

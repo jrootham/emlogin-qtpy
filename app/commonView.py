@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets
+from PySide2 import QtCore
 
 def horizontal(widget):
     layout = QtWidgets.QHBoxLayout()
@@ -21,3 +22,12 @@ def button(layout, text, action):
     layout.addLayout(horizontal(button))
     layout.insertStretch(-1)
 
+def buttons(widget, layout, save):
+    buttons = QtWidgets.QDialogButtonBox(
+    QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
+    QtCore.Qt.Horizontal, widget)
+    layout.addWidget(buttons)
+    layout.insertStretch(-1)
+
+    buttons.accepted.connect(save)
+    buttons.rejected.connect(widget.reject)
