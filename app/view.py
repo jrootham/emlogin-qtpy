@@ -40,9 +40,10 @@ def getPassword():
 
         
 class NoPasswordWidget(QtWidgets.QWidget):
-    def __init__(self, controller):
+    def __init__(self, app, controller):
         super().__init__()
 
+        self.app = app
         self.controller = controller
 
         layout = QtWidgets.QVBoxLayout()
@@ -87,7 +88,7 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
     def login(self):
         if self.pickSite.currentText() != "":
-            errors = self.controller.login(self.pickSite.currentText())
+            errors = self.controller.login(self.app, self.pickSite.currentText())
             self.messages.setText(errors)
         else:
             self.messages.setText("No site available")
@@ -99,7 +100,7 @@ class NoPasswordWidget(QtWidgets.QWidget):
 def run(controller):
     app = QtWidgets.QApplication()
 
-    widget = NoPasswordWidget(controller)
+    widget = NoPasswordWidget(app, controller)
     widget.resize(200, 200)
     widget.show()
 

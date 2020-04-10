@@ -1,9 +1,11 @@
 import time
 import secrets
 import requests
-from imaplib import IMAP4_SSL
+import socket
+import imaplib
 import mailparser
 from html.parser import HTMLParser
+from PySide2 import QtCore
 from PySide2.QtGui import QDesktopServices
 
 from Mailboxes import Mailboxes
@@ -20,11 +22,95 @@ class ParseLink(HTMLParser):
         
     def handle_starttag(self, start, attributes):
         if "meta" == start:
-            print(attributes)
             if ('name', 'np-target') in attributes:
                 pairList = [pair for pair in attributes if 'content' in pair]
                 self.link = pairList.pop()[1]
 
+
+class Login(object):
+    """docstring for Login"""
+    def __init__(self, app, host, userName, password, token):
+        super(Login, self).__init__()
+        
+        self.app = app
+        self.host = host
+        self.userName = userName
+        self.password = password
+        self.token = token
+
+        self.errorList = ""
+
+        self.subject = '"[#! nopassword {}]"'.format(token)
+
+
+    def search(self):
+        try:
+            imap = imaplib.IMAP4_SSL(host=self.host)        
+            imap.login(self.userName, self.password)
+
+            imap.select()
+            error, searchResult = imap.search(None, "SUBJECT " + self.subject)
+            num = searchResult[0]
+
+            if 0 != len(num):
+                self.found = True
+              
+                if b' ' not in num:  
+                    typ, data = imap.fetch(num, '(RFC822)')
+                    mail = mailparser.parse_from_bytes(data[0][1])
+                    htmlParser = ParseLink()
+                    htmlParser.feed(mail.body)
+
+                    url = htmlParser.link
+                    if 0 != len(url):
+                        QDesktopServices.openUrl(url)
+
+                        imap.store(num, '+FLAGS', '\\Deleted')
+
+                        self.errorList = ""
+
+                    else:
+                        self.errorList = "URL not found in mail"
+
+                else:
+                    self.errorList = "More than one email found"
+
+            else:
+                self.errorList = "Email not found"
+
+            imap.close()
+            imap.logout()
+
+        except socket.gaierror as error:
+            code, self.errorList = error.args
+            self.found = True
+
+        except imaplib.IMAP4.error as error:
+            reason, = error.args
+            self.errorList = reason.decode()
+            self.found = True
+            
+        self.done = True
+ 
+    def login(self):
+        count = 0
+        delay = 1000
+        self.found = False
+
+        while not self.found:
+
+            self.done = False
+            QtCore.QTimer.singleShot(delay, self.search)
+
+            while not self.done:
+                self.app.processEvents()
+
+            delay *= 2
+            count += 1
+            if 8 <= count:
+                break
+
+        return self.errorList
 
 class Controller(object):
     """
@@ -73,14 +159,14 @@ class Controller(object):
     def deleteSite(self, name):
         return self.sites.deleteSite(name)
 
-    def login(self, name):
+    def login(self, app, name):
         token = secrets.token_hex(16)
         if self.sites.exists(name):
             siteId, name, endpoint, identifier, address = self.sites.getSite(name)
             payload = {"identifier": identifier, "token": token}
             response = requests.get(endpoint, payload)
             if response.status_code == requests.codes.ok:
-                return self.readEmail(token, address)
+                return self.readEmail(app, token, address)
             else:
                 return response.text
 
@@ -88,7 +174,7 @@ class Controller(object):
             return name + " does not exist"
 
 
-    def readEmail(self, token, address):
+    def readEmail(self, app, token, address):
         mailboxId, address, host, userName = self.getMailbox(address)
 
         if address in self.passwordDict:
@@ -100,56 +186,9 @@ class Controller(object):
             else:
                 return ""  # User cancelled the prompt
 
-        imap = IMAP4_SSL(host=host)        
-        imap.login(userName, password)
+        login = Login(app, host, userName, password, token)
+        result = login.login()
+        
+        del login
 
-        imap.select()
-
-        subject = '"[#! nopassword {}]"'.format(token)
-
-        num = b''
-        count = 0
-        delay = 1
-
-        while 0 == len(num):
-            error, result = imap.search(None, "SUBJECT " + subject)
-            num = result[0]
-            print('Try')
-            time.sleep(delay)
-            delay *= 2
-            count += 1
-            if 6 < count:
-                break
-
-        if 0 != len(num):
-            if b' ' not in num:
-                typ, data = imap.fetch(num, '(RFC822)')
-                mail = mailparser.parse_from_bytes(data[0][1])
-                htmlParser = ParseLink()
-                htmlParser.feed(mail.body)
-
-                url = htmlParser.link
-                if 0 != len(url):
-                    QDesktopServices.openUrl(url)
-
-                    imap.store(num, '+FLAGS', '\\Deleted')
-                    imap.expunge()                    
-                    imap.close()
-                    imap.logout()
-
-                    return ""
-                else:
-                    imap.close()
-                    imap.logout()
-                    return "URL not found in mail"
-
-            else:
-                imap.close()
-                imap.logout()
-                return "More than one email"
-
-        else:
-            imap.close()
-            imap.logout()
-            return "Email not found"
-
+        return result
