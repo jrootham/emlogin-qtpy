@@ -42,6 +42,12 @@ class Login(object):
 
         self.subject = '"[#! nopassword {}]"'.format(token)
 
+    def delete(self, imap, num):
+        if self.host == "imap.gmail.com":    
+            imap.copy(num, '[Gmail]/Trash')
+        else:
+            imap.store(num, '+FLAGS', '\\Deleted')
+
 
     def search(self):
         try:
@@ -64,8 +70,7 @@ class Login(object):
                     url = htmlParser.link
                     if 0 != len(url):
                         QDesktopServices.openUrl(url)
-
-                        imap.store(num, '+FLAGS', '\\Deleted')
+                        self.delete(imap, num)
 
                         self.errorList = ""
 
