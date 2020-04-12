@@ -73,7 +73,7 @@ class Login(object):
                         self.errorList = "URL not found in mail"
 
                 else:
-                    self.errorList = "More than one email found"
+                    self.errorList = "More than one email found, possible attack"
 
             else:
                 self.errorList = "Email not found"
@@ -92,14 +92,15 @@ class Login(object):
             
         self.done = True
  
-    def login(self):
-        count = 0
+    def login(self, display):
+        count = 1
         delay = 1000
         self.found = False
 
         while not self.found:
 
             self.done = False
+            display.display("Launching search try {}\nDelaying {} seconds".format(count, delay/1000))
             QtCore.QTimer.singleShot(delay, self.search)
 
             while not self.done:
@@ -159,14 +160,16 @@ class Controller(object):
     def deleteSite(self, name):
         return self.sites.deleteSite(name)
 
-    def login(self, app, name):
+    def login(self, app, display, name):
         token = secrets.token_hex(16)
         if self.sites.exists(name):
             siteId, name, endpoint, identifier, address = self.sites.getSite(name)
             payload = {"identifier": identifier, "token": token}
+            display.display("Making request")
             response = requests.get(endpoint, payload)
             if response.status_code == requests.codes.ok:
-                return self.readEmail(app, token, address)
+                display.display("Reading mail")
+                return self.readEmail(app, display, token, address)
             else:
                 return response.text
 
@@ -174,7 +177,7 @@ class Controller(object):
             return name + " does not exist"
 
 
-    def readEmail(self, app, token, address):
+    def readEmail(self, app, display, token, address):
         mailboxId, address, host, userName = self.getMailbox(address)
 
         if address in self.passwordDict:
@@ -187,7 +190,7 @@ class Controller(object):
                 return ""  # User cancelled the prompt
 
         login = Login(app, host, userName, password, token)
-        result = login.login()
+        result = login.login(display)
         
         del login
 

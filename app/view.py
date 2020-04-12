@@ -88,10 +88,14 @@ class NoPasswordWidget(QtWidgets.QWidget):
 
     def login(self):
         if self.pickSite.currentText() != "":
-            errors = self.controller.login(self.app, self.pickSite.currentText())
+            errors = self.controller.login(self.app, self, self.pickSite.currentText())
             self.messages.setText(errors)
         else:
             self.messages.setText("No site available")
+
+    def display(self, message):
+        self.messages.setText(message)
+        self.app.processEvents()
 
     def exit(self):
         self.close()
