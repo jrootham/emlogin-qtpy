@@ -3,24 +3,20 @@ from PySide2 import QtCore
 import commonView
 from EditMailbox import EditMailbox
 
-class PickMailbox(QtWidgets.QDialog):
+class PickMailbox(commonView.CommonView):
     """docstring for PickMailbox"""
     def __init__(self, addressList):
         super(PickMailbox, self).__init__()
 
-        layout = QtWidgets.QVBoxLayout()
-
-        layout.insertStretch(0)
-
         self.pick = QtWidgets.QComboBox()
         self.pick.addItems(addressList)
         label = QtWidgets.QLabel("Select Mailbox")
-        layout.addLayout(commonView.horizontalPair(label, self.pick))
-        layout.insertStretch(-1)
+        self.layout.addLayout(commonView.horizontalPair(label, self.pick))
+        self.layout.insertStretch(-1)
 
-        commonView.buttons(self, layout, self.save)
+        commonView.buttons(self, self.layout, self.save)
 
-        self.setLayout(layout)
+        self.setLayout(self.layout)
 
     def save(self):
         self.picked = self.pick.currentText()
@@ -53,22 +49,17 @@ class EditAction(ActionBase):
         return self.controller.updateMailbox(self.mailboxId, address, host, userName)
 
 
-class MailboxesView(QtWidgets.QDialog):
+class MailboxesView(commonView.CommonView):
     """Buttons to select mailbox editing actions"""
     def __init__(self, controller):
         super(MailboxesView, self).__init__()
 
         self.controller = controller
         
-        layout = QtWidgets.QVBoxLayout()
-        layout.insertStretch(0)
-
-        commonView.button(layout, "Add Mailbox", self.addMailbox)
-        commonView.button(layout, "Edit Mailbox", self.editMailbox)
-        commonView.button(layout, "Delete Mailbox", self.deleteMailbox)
-        commonView.button(layout, "Close", self.exit)
-
-        self.setLayout(layout)
+        commonView.button(self.layout, "Add Mailbox", self.addMailbox)
+        commonView.button(self.layout, "Edit Mailbox", self.editMailbox)
+        commonView.button(self.layout, "Delete Mailbox", self.deleteMailbox)
+        commonView.button(self.layout, "Close", self.exit)
 
 
     def addMailbox(self):

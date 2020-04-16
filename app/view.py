@@ -4,33 +4,30 @@ import commonView
 import mailboxesView
 import sitesView
 
-class Password(QtWidgets.QDialog):
+class Password(commonView.CommonView):
     """docstring for Password"""
-    def __init__(self):
+    def __init__(self, address):
         super(Password, self).__init__()
 
         self.password = ""
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.insertStretch(0)
+        self.layout.addLayout(commonView.horizontal(QtWidgets.QLabel(address)))
 
         passwordLabel = QtWidgets.QLabel("Password")
         self.passwordEdit = QtWidgets.QLineEdit()
         self.passwordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
 
-        layout.addLayout(commonView.horizontalPair(passwordLabel, self.passwordEdit))
-        layout.insertStretch(-1)
+        self.layout.addLayout(commonView.horizontalPair(passwordLabel, self.passwordEdit))
+        self.layout.insertStretch(-1)
 
-        commonView.buttons(self, layout, self.save)
-
-        self.setLayout(layout)
+        commonView.buttons(self, self.layout, self.save)
 
     def save(self):
         self.password = self.passwordEdit.text()
         self.accept()
 
-def getPassword():
-    widget = Password()
+def getPassword(address):
+    widget = Password(address)
     widget.passwordEdit.setFocus()
     if widget.exec():
         return widget.password
@@ -39,39 +36,28 @@ def getPassword():
 
 
         
-class NoPasswordWidget(QtWidgets.QWidget):
+class NoPasswordWidget(commonView.CommonView):
     def __init__(self, app, controller):
         super().__init__()
 
         self.app = app
         self.controller = controller
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.insertStretch(0)
-
-        title = QtWidgets.QLabel("No Password")
-        
-        layout.addLayout(commonView.horizontal(title))
-        layout.insertStretch(-1)
-
-        commonView.button(layout, "Edit Mailboxes", self.editMailboxes)
-        commonView.button(layout, "Edit Sites", self.editSites)
+        commonView.button(self.layout, "Edit Mailboxes", self.editMailboxes)
+        commonView.button(self.layout, "Edit Sites", self.editSites)
         
         self.pickSite = QtWidgets.QComboBox()
-        layout.addLayout(commonView.horizontal(self.pickSite))
+        self.layout.addLayout(commonView.horizontal(self.pickSite))
         self.pickSite.addItems(self.controller.getSiteList())
-        layout.insertStretch(-1)
+        self.layout.insertStretch(-1)
 
-        commonView.button(layout, "Login", self.login)
-        commonView.button(layout, "Exit", self.exit)
+        commonView.button(self.layout, "Login", self.login)
+        commonView.button(self.layout, "Exit", self.exit)
 
         self.messages = QtWidgets.QLabel()
-        layout.addLayout(commonView.horizontal(self.messages))
+        self.layout.addLayout(commonView.horizontal(self.messages))
         self.messages.setText(" ")
-        layout.insertStretch(-1)
-
-        self.setLayout(layout)
-
+        self.layout.insertStretch(-1)
 
     def editMailboxes(self):
         mailboxesView.display(self.controller)
@@ -105,7 +91,7 @@ def run(controller):
     app = QtWidgets.QApplication()
 
     widget = NoPasswordWidget(app, controller)
-    widget.resize(200, 200)
+    widget.resize(250, 200)
     widget.show()
 
     sys.exit(app.exec_())

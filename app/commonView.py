@@ -31,3 +31,15 @@ def buttons(widget, layout, save):
 
     buttons.accepted.connect(save)
     buttons.rejected.connect(widget.reject)
+
+class CommonView(QtWidgets.QDialog):
+    """Base class for dialogues """
+    def __init__(self):
+        super(CommonView, self).__init__()
+
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.insertStretch(0)
+
+        self.setWindowTitle("EMail Login")
+
+        self.setLayout(self.layout)

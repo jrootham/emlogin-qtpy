@@ -29,10 +29,12 @@ class ParseLink(HTMLParser):
 
 class Login(object):
     """docstring for Login"""
-    def __init__(self, app, host, userName, password, token):
+    def __init__(self, app, controller, address, host, userName, password, token):
         super(Login, self).__init__()
         
         self.app = app
+        self.controller = controller
+        self.address = address
         self.host = host
         self.userName = userName
         self.password = password
@@ -91,6 +93,7 @@ class Login(object):
             self.found = True
 
         except imaplib.IMAP4.error as error:
+            self.controller.resetPassword(self.address)
             reason, = error.args
             self.errorList = reason.decode()
             self.found = True
@@ -122,8 +125,10 @@ class Controller(object):
     """
     Controller contains the models and the database connection
     Models get the database connection passed to them
-    Models are exposed to the Views
+    Model functions are wrapped in functions exposed to the Views
+    Login is implemented here
     """
+
     def __init__(self, filename):
         self.connection = database.makeConnection(filename)
 
@@ -153,6 +158,9 @@ class Controller(object):
     def getSiteList(self):
         return self.sites.getSiteList()
 
+    def siteExists(self, name):
+        return self.sites.exists(name)
+
     def getSite(self, name):
         return self.sites.getSite(name)
 
@@ -164,6 +172,11 @@ class Controller(object):
 
     def deleteSite(self, name):
         return self.sites.deleteSite(name)
+
+
+    def resetPassword(self, address):
+        del self.passwordDict[address]
+        
 
     def login(self, app, display, name):
         token = secrets.token_hex(16)
@@ -183,20 +196,24 @@ class Controller(object):
 
 
     def readEmail(self, app, display, token, address):
-        mailboxId, address, host, userName = self.getMailbox(address)
+        if self.mailboxes.exists(address):
+            mailboxId, address, host, userName = self.getMailbox(address)
 
-        if address in self.passwordDict:
-            password = self.passwordDict[address]
-        else:
-            password = view.getPassword()
-            if 0 != len(password):
-                self.passwordDict[address] = password
+            if address in self.passwordDict:
+                password = self.passwordDict[address]
             else:
-                return ""  # User cancelled the prompt
+                password = view.getPassword(address)
+                if 0 != len(password):
+                    self.passwordDict[address] = password
+                else:
+                    return ""  # User cancelled the prompt
 
-        login = Login(app, host, userName, password, token)
-        result = login.login(display)
-        
-        del login
+            login = Login(app, self, address, host, userName, password, token)
+            result = login.login(display)
+            
+            del login
 
-        return result
+            return result
+        else:
+            return "Mailbox " + address + " does not exist"
+

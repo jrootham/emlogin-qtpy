@@ -12,7 +12,7 @@ protocal.
 """
 def fileName():
     """File name constant"""
-    return "nopassword.sqlite"
+    return ".emsignon.sqlite"
 
         
 if __name__ == "__main__":

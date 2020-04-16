@@ -10,7 +10,7 @@ class Mailboxes(object):
     """Access class for mailboxes"""
 
     def __init__(self, connection):
-        """Fill in local mailboxes from mailboxesbase"""
+        """Fill in local mailboxes from mailbox table"""
 
         self.connection = connection
         self.mailboxes = {}
@@ -22,7 +22,7 @@ class Mailboxes(object):
             self.mailboxes[address] = (mailboxId, host, userName)
 
 
-    def exists(self, adress):
+    def exists(self, address):
         return address in self.mailboxes
 
     def getMailboxList(self):

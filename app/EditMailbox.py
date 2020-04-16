@@ -2,18 +2,14 @@ from PySide2 import QtWidgets
 from PySide2 import QtCore
 import commonView
 
-class EditMailbox(QtWidgets.QDialog):
+class EditMailbox(commonView.CommonView):
     """UI for adding mailboxes"""
     def __init__(self, title, action, address, host, userName):
         super(EditMailbox, self).__init__()
         self.action = action
 
-        layout = QtWidgets.QVBoxLayout(self)
-        
-        layout.insertStretch(0)
-
-        layout.addLayout(commonView.horizontal(QtWidgets.QLabel(title)))
-        layout.insertStretch(-1)
+        self.layout.addLayout(commonView.horizontal(QtWidgets.QLabel(title)))
+        self.layout.insertStretch(-1)
 
         self.addressEdit = QtWidgets.QLineEdit(address)
         self.hostEdit = QtWidgets.QLineEdit(host)
@@ -27,25 +23,14 @@ class EditMailbox(QtWidgets.QDialog):
         valuesBox.addWidget(QtWidgets.QLabel("User Name"), 2, 0)
         valuesBox.addWidget(self.userNameEdit, 2, 1)
 
-        layout.addLayout(valuesBox)
-        layout.insertStretch(-1)
+        self.layout.addLayout(valuesBox)
+        self.layout.insertStretch(-1)
 
-
-        buttons = QtWidgets.QDialogButtonBox(
-        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-        QtCore.Qt.Horizontal, self)
-        layout.addWidget(buttons)
-
-        buttons.accepted.connect(self.save)
-        buttons.rejected.connect(self.reject)
-
-        layout.insertStretch(-1)
+        commonView.buttons(self, self.layout, self.save)
 
         self.messages = QtWidgets.QLabel(" ")
-        layout.addWidget(self.messages)
-        layout.insertStretch(-1)
-
-        self.setLayout(layout)
+        self.layout.addWidget(self.messages)
+        self.layout.insertStretch(-1)
 
 
     def save(self):
