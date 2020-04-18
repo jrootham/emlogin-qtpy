@@ -10,7 +10,7 @@ class PickMailbox(commonView.CommonView):
 
         self.pick = QtWidgets.QComboBox()
         self.pick.addItems(addressList)
-        label = QtWidgets.QLabel("Select Mailbox")
+        label = commonView.PlainLabel("Select Mailbox")
         self.layout.addLayout(commonView.horizontalPair(label, self.pick))
         self.layout.insertStretch(-1)
 

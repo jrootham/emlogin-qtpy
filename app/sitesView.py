@@ -9,7 +9,7 @@ class PickSite(commonView.CommonView):
 
         self.pick = QtWidgets.QComboBox()
         self.pick.addItems(siteList)
-        label = QtWidgets.QLabel("Select Site")
+        label = commonView.PlainLabel("Select Site")
         self.layout.addLayout(commonView.horizontalPair(label, self.pick))
         self.layout.insertStretch(-1)
 
@@ -25,14 +25,14 @@ class RenameSiteBase(commonView.CommonView):
         super(RenameSiteBase, self).__init__()
 
         self.newName = QtWidgets.QLineEdit()
-        label = QtWidgets.QLabel("New Name")
+        label = commonView.PlainLabel("New Name")
         self.layout.addLayout(commonView.horizontalPair(label, self.newName))
 
         self.layout.insertStretch(-1)
 
         commonView.buttons(self, self.layout, self.save)
 
-        self.messages = QtWidgets.QLabel(" ")
+        self.messages = commonView.PlainLabel(" ")
         self.layout.addLayout(commonView.horizontal(self.messages))
         self.layout.insertStretch(-1)
 
@@ -82,7 +82,7 @@ class AddSite(commonView.CommonView):
         self.controller = controller
         self.picker = picker
 
-        dataLabel = QtWidgets.QLabel("Data block")
+        dataLabel = commonView.PlainLabel("Data block")
         self.data = QtWidgets.QTextEdit()
 
         self.layout.addLayout(commonView.horizontalPair(dataLabel, self.data))
@@ -91,7 +91,7 @@ class AddSite(commonView.CommonView):
 
         commonView.buttons(self, self.layout, self.save)
 
-        self.messages = QtWidgets.QLabel(" ")
+        self.messages = commonView.PlainLabel(" ")
 
         self.layout.addLayout(commonView.horizontal(self.messages))
         self.layout.insertStretch(-1)
@@ -119,6 +119,27 @@ class AddSite(commonView.CommonView):
             else:
                 self.reject()
 
+class DisplaySite(commonView.CommonView):
+    """docstring for DisplaySite"""
+    def __init__(self, name, endpoint, identifier, address):
+        super(DisplaySite, self).__init__()
+
+        self.show("Name", name)
+        self.show("Endpoint", endpoint)
+        self.show("Identifier", identifier)
+        self.show("Address", address)
+
+        commonView.button(self.layout, "Close", self.close)
+
+    def show(self, label, data):
+        labelWidget = commonView.PlainLabel(label)
+        dataWidget = commonView.PlainLabel(data)
+
+        self.layout.addLayout(commonView.horizontalPair(labelWidget, dataWidget))
+
+        self.layout.insertStretch(-1)
+
+
 
 class SitesView(commonView.CommonView):
     """Buttons to select mailbox editing actions"""
@@ -131,7 +152,8 @@ class SitesView(commonView.CommonView):
         commonView.button(self.layout, "Add Site", self.addSite)
         commonView.button(self.layout, "Rename Site", self.renameSite)
         commonView.button(self.layout, "Delete Site", self.deleteSite)
-        commonView.button(self.layout, "Close", self.exit)
+        commonView.button(self.layout, "Display Site", self.displaySite)
+        commonView.button(self.layout, "Close", self.close)
 
 
     def addSite(self):
@@ -152,8 +174,13 @@ class SitesView(commonView.CommonView):
             self.controller.deleteSite(toDelete)
             self.picker.deleteSite(toDelete)
 
-    def exit(self):
-        self.close()
+    def displaySite(self):
+        pick = PickSite(self.controller.getSiteList())
+        if pick.exec():
+            siteId, name, endpoint, identifier, address = self.controller.getSite(pick.picked)
+            display = DisplaySite(name, endpoint, identifier, address)
+            display.exec()
+
 
 def display(controller, picker):
     sites = SitesView(controller, picker)

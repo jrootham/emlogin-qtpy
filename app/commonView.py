@@ -32,6 +32,12 @@ def buttons(widget, layout, save):
     buttons.accepted.connect(save)
     buttons.rejected.connect(widget.reject)
 
+class PlainLabel(QtWidgets.QLabel):
+    """docstring for PlainLabel"""
+    def __init__(self, text = " "):
+        super(PlainLabel, self).__init__(text)
+        self.setTextFormat(QtCore.Qt.PlainText)
+        
 class CommonView(QtWidgets.QDialog):
     """Base class for dialogues """
     def __init__(self):

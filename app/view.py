@@ -11,9 +11,9 @@ class Password(commonView.CommonView):
 
         self.password = ""
 
-        self.layout.addLayout(commonView.horizontal(QtWidgets.QLabel(address)))
+        self.layout.addLayout(commonView.horizontal(commonView.PlainLabel(address)))
 
-        passwordLabel = QtWidgets.QLabel("Password")
+        passwordLabel = commonView.PlainLabel("Password")
         self.passwordEdit = QtWidgets.QLineEdit()
         self.passwordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
 
@@ -54,7 +54,7 @@ class NoPasswordWidget(commonView.CommonView):
         commonView.button(self.layout, "Login", self.login)
         commonView.button(self.layout, "Exit", self.exit)
 
-        self.messages = QtWidgets.QLabel()
+        self.messages = commonView.PlainLabel()
         self.layout.addLayout(commonView.horizontal(self.messages))
         self.messages.setText(" ")
         self.layout.insertStretch(-1)
