@@ -36,7 +36,7 @@ def getPassword(address):
 
 
         
-class NoPasswordWidget(commonView.CommonView):
+class EMLoginWidget(commonView.CommonView):
     def __init__(self, app, controller):
         super().__init__()
 
@@ -90,7 +90,7 @@ class NoPasswordWidget(commonView.CommonView):
 def run(controller):
     app = QtWidgets.QApplication()
 
-    widget = NoPasswordWidget(app, controller)
+    widget = EMLoginWidget(app, controller)
     widget.resize(250, 200)
     widget.show()
 

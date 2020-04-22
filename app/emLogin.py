@@ -5,7 +5,7 @@ from Controller import Controller
 import view
 
 """
-noPassword is an application designed to make it easier to login to sites that support the noPassword 
+EMLogin is an application designed to make it easier to login to sites that support the EMLogin 
 protocal.
 
 

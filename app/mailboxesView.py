@@ -61,6 +61,9 @@ class MailboxesView(commonView.CommonView):
         commonView.button(self.layout, "Delete Mailbox", self.deleteMailbox)
         commonView.button(self.layout, "Close", self.exit)
 
+        self.messages = commonView.PlainLabel(" ")
+        self.layout.addLayout(commonView.horizontal(self.messages))
+        self.layout.insertStretch(-1)
 
     def addMailbox(self):
         add = EditMailbox("Add Mailbox", AddAction(self.controller), "", "", "")
@@ -69,10 +72,13 @@ class MailboxesView(commonView.CommonView):
     def editMailbox(self):
         pick = PickMailbox(self.controller.getMailboxList())
         if pick.exec():
-            mailboxId, address, host, userName = self.controller.getMailbox(pick.picked)
-            action = EditAction(self.controller, mailboxId)
-            edit = EditMailbox("Edit Mailbox", action, address, host, userName)
-            edit.exec()
+            if self.controller.mailboxExists(pick.picked):
+                mailboxId, address, host, userName = self.controller.getMailbox(pick.picked)
+                action = EditAction(self.controller, mailboxId)
+                edit = EditMailbox("Edit Mailbox", action, address, host, userName)
+                edit.exec()
+            else:
+                self.messages.setText(pick.picked + " does not exist")
 
     # def editMailbox(self):
     #     pass
@@ -80,7 +86,10 @@ class MailboxesView(commonView.CommonView):
     def deleteMailbox(self):
         pick = PickMailbox(self.controller.getMailboxList())
         if pick.exec():
-            self.controller.deleteMailbox(pick.picked)
+            if self.controller.mailboxExists(pick.picked):
+                self.controller.deleteMailbox(pick.picked)
+            else:
+                self.messages.setText(pick.picked + " does not exist")
 
 
     def exit(self):

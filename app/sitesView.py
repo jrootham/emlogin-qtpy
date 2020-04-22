@@ -155,6 +155,9 @@ class SitesView(commonView.CommonView):
         commonView.button(self.layout, "Display Site", self.displaySite)
         commonView.button(self.layout, "Close", self.close)
 
+        self.messages = commonView.PlainLabel(" ")
+        self.layout.addLayout(commonView.horizontal(self.messages))
+        self.layout.insertStretch(-1)
 
     def addSite(self):
         add = AddSite(self.controller, self.picker)
@@ -163,23 +166,33 @@ class SitesView(commonView.CommonView):
     def renameSite(self):
         pick = PickSite(self.controller.getSiteList())
         if pick.exec():
-            data = self.controller.getSite(pick.picked)
-            rename = RenameSite(self.controller, self.picker, data[1])
-            rename.exec()
+            if self.controller.siteExists(pick.picked):
+                data = self.controller.getSite(pick.picked)
+                rename = RenameSite(self.controller, self.picker, data[1])
+                rename.exec()
+            else:
+                self.messages.setText(pick.picked + " does not exist")
 
     def deleteSite(self):
         pick = PickSite(self.controller.getSiteList())
         if pick.exec():
-            toDelete = pick.picked
-            self.controller.deleteSite(toDelete)
-            self.picker.deleteSite(toDelete)
+            if self.controller.siteExists(pick.picked):
+                toDelete = pick.picked
+                self.controller.deleteSite(toDelete)
+                self.picker.deleteSite(toDelete)
+            else:
+                self.messages.setText(pick.picked + " does not exist")
 
     def displaySite(self):
         pick = PickSite(self.controller.getSiteList())
         if pick.exec():
-            siteId, name, endpoint, identifier, address = self.controller.getSite(pick.picked)
-            display = DisplaySite(name, endpoint, identifier, address)
-            display.exec()
+            if self.controller.siteExists(pick.picked):
+                siteId, name, endpoint, identifier, address = self.controller.getSite(pick.picked)
+                display = DisplaySite(name, endpoint, identifier, address)
+                display.exec()
+            else:
+                self.messages.setText(pick.picked + " does not exist")
+
 
 
 def display(controller, picker):

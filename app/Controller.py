@@ -22,7 +22,7 @@ class ParseLink(HTMLParser):
         
     def handle_starttag(self, start, attributes):
         if "meta" == start:
-            if ('name', 'np-target') in attributes:
+            if ('name', 'eml-target') in attributes:
                 pairList = [pair for pair in attributes if 'content' in pair]
                 self.link = pairList.pop()[1]
 
@@ -42,7 +42,7 @@ class Login(object):
 
         self.errorList = ""
 
-        self.subject = '"[#! nopassword {}]"'.format(token)
+        self.subject = '"[#! emlogin {}]"'.format(token)
 
     def delete(self, imap, num):
         if self.host == "imap.gmail.com":    
@@ -140,6 +140,9 @@ class Controller(object):
 
     def getMailboxList(self):
         return self.mailboxes.getMailboxList()
+
+    def mailboxExists(self, address):
+        return self.mailboxes.exists(address)
 
     def getMailbox(self, address):
         return self.mailboxes.getMailbox(address)
