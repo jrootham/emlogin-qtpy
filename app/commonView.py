@@ -24,8 +24,7 @@ def button(layout, text, action):
 
 def buttons(widget, layout, save):
     buttons = QtWidgets.QDialogButtonBox(
-    QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
-    QtCore.Qt.Horizontal, widget)
+    QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, widget)
     layout.addWidget(buttons)
     layout.insertStretch(-1)
 

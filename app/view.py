@@ -38,6 +38,7 @@ def getPassword(address):
         
 class EMLoginWidget(commonView.CommonView):
     def __init__(self, app, controller):
+        """app is included so that we can call the eventloop and put messages in a loop"""
         super().__init__()
 
         self.app = app
@@ -91,7 +92,7 @@ def run(controller):
     app = QtWidgets.QApplication()
 
     widget = EMLoginWidget(app, controller)
-    widget.resize(250, 200)
+    widget.resize(240, 200)
     widget.show()
 
     sys.exit(app.exec_())

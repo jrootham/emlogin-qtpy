@@ -1,5 +1,6 @@
 import sys
 import sqlite3
+import pathlib
 
 from Controller import Controller
 import view
@@ -12,7 +13,7 @@ protocal.
 """
 def fileName():
     """File name constant"""
-    return ".emsignon.sqlite"
+    return str(pathlib.Path.home()) + "/.config/emlogin.sqlite"
 
         
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets
 from PySide2 import QtCore
+import requests
 import commonView
 
 class PickSite(commonView.CommonView):
@@ -82,10 +83,10 @@ class AddSite(commonView.CommonView):
         self.controller = controller
         self.picker = picker
 
-        dataLabel = commonView.PlainLabel("Data block")
-        self.data = QtWidgets.QTextEdit()
+        dataLabel = commonView.PlainLabel("Data link")
+        self.linkText = QtWidgets.QLineEdit()
 
-        self.layout.addLayout(commonView.horizontalPair(dataLabel, self.data))
+        self.layout.addLayout(commonView.horizontalPair(dataLabel, self.linkText))
 
         self.layout.insertStretch(-1)
 
@@ -97,27 +98,36 @@ class AddSite(commonView.CommonView):
         self.layout.insertStretch(-1)
 
     def save(self):
-        text = self.data.toPlainText()
-        name, endpoint, identifier, address = text.split("\n")
-        
-        if not self.controller.siteExists(name):
-            messages = self.controller.addSite(name, endpoint, identifier, address)
-            if len(messages) == 0:
-                self.picker.addSite(name)
-                self.accept()
-            else:
-                self.messages.setText(messages)
-        else:
-            newName = NewSiteName(self.controller, name)
-            if newName.exec():
-                messages = self.controller.addSite(newName.name, endpoint, identifier, address)
+        link = self.linkText.text()
+        get = requests.get(link)
+        result = get.json()
+
+        if (result['found']):
+            name = result['name']
+            endpoint = result['endpoint']
+            identifier = result['identifier']
+            address = result['address']
+            
+            if not self.controller.siteExists(name):
+                messages = self.controller.addSite(name, endpoint, identifier, address)
                 if len(messages) == 0:
-                    self.picker.addSite(newName.name)
+                    self.picker.addSite(name)
                     self.accept()
                 else:
                     self.messages.setText(messages)
             else:
-                self.reject()
+                newName = NewSiteName(self.controller, name)
+                if newName.exec():
+                    messages = self.controller.addSite(newName.name, endpoint, identifier, address)
+                    if len(messages) == 0:
+                        self.picker.addSite(newName.name)
+                        self.accept()
+                    else:
+                        self.messages.setText(messages)
+                else:
+                    self.reject()
+        else:
+            setText.messages,setText(link + " is not valid")
 
 class DisplaySite(commonView.CommonView):
     """docstring for DisplaySite"""
